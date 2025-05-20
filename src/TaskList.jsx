@@ -1,31 +1,12 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
+import TaskRow from "./TaskRow";
+import { useTaskContext } from "./context/TaskContext";
 
 function TaskList() {
-  const [tasks, setTasks] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const { tasks, isLoading, error } = useTaskContext();
   const [filter, setFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
-
-  useEffect(() => {
-    fetchTasks();
-  }, []);
-
-  const fetchTasks = async () => {
-    try {
-      const response = await fetch("http://localhost:3001/tasks");
-      if (!response.ok) {
-        throw new Error("Failed to fetch tasks");
-      }
-      const data = await response.json();
-      setTasks(data);
-      setIsLoading(false);
-    } catch (err) {
-      setError(err.message);
-      setIsLoading(false);
-    }
-  };
 
   const filteredTasks = tasks
     .filter((task) => {
@@ -84,9 +65,9 @@ function TaskList() {
             className="form-select"
           >
             <option value="all">All Tasks</option>
-            <option value="pending">Pending</option>
-            <option value="in_progress">In Progress</option>
-            <option value="completed">Completed</option>
+            <option value="to do">To Do</option>
+            <option value="doing">Doing</option>
+            <option value="done">Done</option>
           </select>
         </div>
       </div>
@@ -96,28 +77,21 @@ function TaskList() {
           No tasks found
         </div>
       ) : (
-        <div className="row g-4">
-          {filteredTasks.map((task) => (
-            <div key={task.id} className="col-md-6 col-lg-4">
-              <div className="card h-100">
-                <div className="card-body">
-                  <h5 className="card-title">{task.title}</h5>
-                  <p className="card-text">{task.description}</p>
-                  <span
-                    className={`badge ${
-                      task.status === "completed"
-                        ? "bg-success"
-                        : task.status === "in_progress"
-                        ? "bg-warning"
-                        : "bg-secondary"
-                    }`}
-                  >
-                    {task.status.replace("_", " ")}
-                  </span>
-                </div>
-              </div>
-            </div>
-          ))}
+        <div className="table-responsive">
+          <table className="table table-hover">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Status</th>
+                <th>Creation Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredTasks.map((task) => (
+                <TaskRow key={task.id} task={task} />
+              ))}
+            </tbody>
+          </table>
         </div>
       )}
     </div>
