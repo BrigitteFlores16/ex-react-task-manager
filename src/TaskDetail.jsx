@@ -3,6 +3,7 @@ import { useTaskContext } from "./context/TaskContext";
 import { useState } from "react";
 import Modal from "./components/Modal";
 import EditTaskModal from "./components/EditTaskModal";
+import dayjs from "dayjs";
 
 function TaskDetail() {
   const { id } = useParams();
@@ -70,7 +71,7 @@ function TaskDetail() {
           <div className="mb-4">
             <h5>Data di creazione</h5>
             <p className="card-text">
-              {new Date(task.createdAt).toLocaleDateString()}
+              {dayjs(task.createdAt).format("DD/MM/YYYY")}
             </p>
           </div>
 

@@ -6,11 +6,12 @@ import { useDebounce } from "./hooks/useDebounce";
 import "./index.css";
 
 function TaskList() {
-  const { tasks, isLoading, error } = useTaskContext();
+  const { tasks, isLoading, error, removeMultipleTasks } = useTaskContext();
   const [filter, setFilter] = useState("all");
   const [sortBy, setSortBy] = useState("createdAt");
   const [sortOrder, setSortOrder] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedTaskIds, setSelectedTaskIds] = useState([]);
 
   const handleSearch = useCallback((value) => {
     setSearchQuery(value);
@@ -26,7 +27,6 @@ function TaskList() {
       setSortOrder(1);
     }
   };
-
   const getSortIcon = (column) => {
     if (sortBy !== column)
       return <span className="material-symbols-outlined">swap_vert</span>;
@@ -35,6 +35,27 @@ function TaskList() {
     ) : (
       <span className="material-symbols-outlined">arrow_downward</span>
     );
+  };
+  const toggleSelection = (taskId) => {
+    setSelectedTaskIds((current) =>
+      current.includes(taskId)
+        ? current.filter((id) => id !== taskId)
+        : [...current, taskId]
+    );
+  };
+
+  const handleMultipleDelete = async () => {
+    if (!confirm("Sei sicuro di voler eliminare i task selezionati?")) {
+      return;
+    }
+
+    try {
+      await removeMultipleTasks(selectedTaskIds);
+      alert("Task eliminati con successo!");
+      setSelectedTaskIds([]);
+    } catch (error) {
+      alert(error.message);
+    }
   };
 
   const filteredAndSortedTasks = useMemo(() => {
@@ -95,7 +116,12 @@ function TaskList() {
         <div className="col">
           <h2 className="mb-0">Tasks</h2>
         </div>
-        <div className="col-auto">
+        <div className="col-auto d-flex gap-2">
+          {selectedTaskIds.length > 0 && (
+            <button className="btn btn-danger" onClick={handleMultipleDelete}>
+              Elimina Selezionate ({selectedTaskIds.length})
+            </button>
+          )}
           <Link to="/add" className="btn btn-primary">
             Add New Task
           </Link>
@@ -135,32 +161,19 @@ function TaskList() {
           <table className="table table-hover">
             <thead>
               <tr>
-                <th
-                  className="cursor-pointer user-select-none"
-                  onClick={() => handleSort("title")}
-                  style={{ cursor: "pointer" }}
-                >
-                  Nome {getSortIcon("title")}
-                </th>
-                <th
-                  className="cursor-pointer user-select-none"
-                  onClick={() => handleSort("status")}
-                  style={{ cursor: "pointer" }}
-                >
-                  Stato {getSortIcon("status")}
-                </th>
-                <th
-                  className="cursor-pointer user-select-none"
-                  onClick={() => handleSort("createdAt")}
-                  style={{ cursor: "pointer" }}
-                >
-                  Data di creazione {getSortIcon("createdAt")}
-                </th>
+                <th style={{ width: "40%" }}>Nome</th>
+                <th>Stato</th>
+                <th>Data di Creazione</th>
               </tr>
             </thead>
             <tbody>
               {filteredAndSortedTasks.map((task) => (
-                <TaskRow key={task.id} task={task} />
+                <TaskRow
+                  key={task.id}
+                  task={task}
+                  checked={selectedTaskIds.includes(task.id)}
+                  onToggle={toggleSelection}
+                />
               ))}
             </tbody>
           </table>
