@@ -69,7 +69,31 @@ export function useTasks() {
     }
   };
 
-  const updateTask = async (taskId, updates) => {};
+  const updateTask = async (taskId, updates) => {
+    try {
+      const response = await fetch(`${API_URL}/tasks/${taskId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(updates),
+      });
+
+      const data = await response.json();
+
+      if (!data.success) {
+        throw new Error(data.message);
+      }
+
+      setTasks((currentTasks) =>
+        currentTasks.map((task) => (task.id === taskId ? data.task : task))
+      );
+
+      return data.task;
+    } catch (err) {
+      throw new Error(err.message);
+    }
+  };
 
   return {
     tasks,

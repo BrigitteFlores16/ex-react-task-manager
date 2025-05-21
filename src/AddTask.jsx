@@ -69,7 +69,7 @@ function AddTask() {
       <form onSubmit={handleSubmit}>
         <div className="mb-3">
           <label htmlFor="title" className="form-label">
-            Nome del task
+            Nome
           </label>
           <input
             type="text"
