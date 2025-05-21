@@ -1,13 +1,14 @@
 import { memo } from "react";
+import { Link } from "react-router-dom";
 
 const TaskRow = memo(function TaskRow({ task }) {
   const getStatusColor = (status) => {
-    switch (status.toLowerCase()) {
-      case "to do":
+    switch (status) {
+      case "To do":
         return "bg-danger";
-      case "doing":
+      case "Doing":
         return "bg-warning";
-      case "done":
+      case "Done":
         return "bg-success";
       default:
         return "bg-secondary";
@@ -16,7 +17,11 @@ const TaskRow = memo(function TaskRow({ task }) {
 
   return (
     <tr>
-      <td>{task.title}</td>
+      <td>
+        <Link to={`/task/${task.id}`} className="text-decoration-none">
+          {task.title}
+        </Link>
+      </td>
       <td>
         <span className={`badge ${getStatusColor(task.status)}`}>
           {task.status}

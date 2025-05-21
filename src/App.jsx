@@ -6,6 +6,7 @@ import {
 } from "react-router-dom";
 import TaskList from "./TaskList";
 import AddTask from "./AddTask";
+import TaskDetail from "./TaskDetail";
 import { TaskProvider } from "./context/TaskContext";
 
 function App() {
@@ -56,6 +57,7 @@ function App() {
             <Routes>
               <Route path="/" element={<TaskList />} />
               <Route path="/add" element={<AddTask />} />
+              <Route path="/task/:id" element={<TaskDetail />} />
             </Routes>
           </div>
         </div>

@@ -1,8 +1,8 @@
 import { useState, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useTaskContext } from "./context/TaskContext";
 
 function AddTask() {
-  const navigate = useNavigate();
+  const { addTask } = useTaskContext();
   const [title, setTitle] = useState("");
   const [titleError, setTitleError] = useState("");
   const descriptionRef = useRef();
@@ -33,6 +33,13 @@ function AddTask() {
     validateTitle(newTitle);
   };
 
+  const resetForm = () => {
+    setTitle("");
+    setTitleError("");
+    descriptionRef.current.value = "";
+    statusRef.current.value = "To do";
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -40,29 +47,18 @@ function AddTask() {
       return;
     }
 
-    const task = {
+    const taskData = {
       title: title.trim(),
       description: descriptionRef.current.value.trim(),
       status: statusRef.current.value,
-      createdAt: new Date().toISOString(),
     };
 
     try {
-      const response = await fetch("http://localhost:3001/tasks", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(task),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to create task");
-      }
-
-      navigate("/");
+      await addTask(taskData);
+      alert("Task creato con successo!");
+      resetForm();
     } catch (error) {
-      console.error("Error creating task:", error);
+      alert(`Errore durante la creazione del task: ${error.message}`);
     }
   };
 
@@ -105,11 +101,11 @@ function AddTask() {
             className="form-select"
             id="status"
             ref={statusRef}
-            defaultValue="to do"
+            defaultValue="To do"
           >
-            <option value="to do">To do</option>
-            <option value="doing">Doing</option>
-            <option value="done">Done</option>
+            <option value="To do">To do</option>
+            <option value="Doing">Doing</option>
+            <option value="Done">Done</option>
           </select>
         </div>
 
