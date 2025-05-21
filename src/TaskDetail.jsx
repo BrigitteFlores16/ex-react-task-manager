@@ -1,9 +1,13 @@
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useTaskContext } from "./context/TaskContext";
+import { useState } from "react";
+import Modal from "./components/Modal";
 
 function TaskDetail() {
   const { id } = useParams();
-  const { tasks } = useTaskContext();
+  const navigate = useNavigate();
+  const { tasks, removeTask } = useTaskContext();
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const task = tasks.find((t) => t.id === parseInt(id));
 
@@ -15,8 +19,14 @@ function TaskDetail() {
     );
   }
 
-  const handleDelete = () => {
-    console.log("Elimino task", id);
+  const handleDelete = async () => {
+    try {
+      await removeTask(task.id);
+      alert("Task eliminato con successo!");
+      navigate("/");
+    } catch (error) {
+      alert(`Errore durante l'eliminazione del task: ${error.message}`);
+    }
   };
 
   return (
@@ -52,9 +62,21 @@ function TaskDetail() {
             </p>
           </div>
 
-          <button className="btn btn-danger" onClick={handleDelete}>
+          <button
+            className="btn btn-danger"
+            onClick={() => setShowDeleteModal(true)}
+          >
             Elimina Task
           </button>
+
+          <Modal
+            show={showDeleteModal}
+            onClose={() => setShowDeleteModal(false)}
+            onConfirm={handleDelete}
+            title="Conferma eliminazione"
+            content={`Sei sicuro di voler eliminare il task "${task.title}"?`}
+            confirmText="Elimina"
+          />
         </div>
       </div>
     </div>
